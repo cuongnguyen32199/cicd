@@ -58,6 +58,7 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: app-build
+
       - name: Upload
         uses: appleboy/scp-action@master
         with:
@@ -141,7 +142,6 @@ jobs:
             ln -s -f ${BASE_PATH}/.env $RELEASE_PATH
             ln -s -f $STORAGE_PATH $RELEASE_PATH
             ln -s -n -f $RELEASE_PATH $ACTIVE_RELEASE_PATH
-            service php8.0-fpm reload
 
   run-after-hooks:
     name: "${{ matrix.server.name }}: After hook"
