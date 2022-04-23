@@ -140,7 +140,7 @@ jobs:
           script: |
             echo $LARAVEL_ENV
             echo $BASE_PATH
-            printf "%s" "$LARAVEL_ENV" > "${BASE_PATH}/.env"
+            printf "%s" $LARAVEL_ENV > "${BASE_PATH}/.env"
             ln -s -f ${BASE_PATH}/.env $RELEASE_PATH
             ln -s -f $STORAGE_PATH $RELEASE_PATH
             ln -s -n -f $RELEASE_PATH $ACTIVE_RELEASE_PATH
