@@ -80,7 +80,7 @@ jobs:
           debug: true
           scripts: |
             mkdir -p "${{ matrix.server.path }}/releases/$GITHUB_SHA"
-            tar -xzf ${{ matrix.server.path }}/artifacts/${GITHUB_SHA}.tar.gz -C "${{ matrix.server.path }}/releases/$GITHUB_SHA"
+            tar -xzf ${{ matrix.server.path }}/artifacts/${GITHUB_SHA}.tar.gz
 
             rm -rf ${{ matrix.server.path }}/releases/${GITHUB_SHA}/storage
             mkdir -p ${{ matrix.server.path }}/storage/{app,public,framework,logs}
