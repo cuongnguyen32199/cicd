@@ -29,7 +29,7 @@ jobs:
       - name: Create deployment artifact
         env:
           GITHUB_SHA: ${{ github.sha }}
-        run: tar -czf "${GITHUB_SHA}".tar.gz --exclude=*.git --exclude=node_modules *
+        run: tar -czf "$GITHUB_SHA".tar.gz --exclude=*.git --exclude=node_modules *
 
       - name: Store artifact for distribution
         uses: actions/upload-artifact@v2
@@ -77,9 +77,10 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ matrix.server.port }}
           envs: GITHUB_SHA
+          debug: true
           scripts: |
             mkdir -p "${{ matrix.server.path }}/releases/${GITHUB_SHA}"
-            tar xzf ${{ matrix.server.path }}/artifacts/${GITHUB_SHA}.tar.gz -C "${{ matrix.server.path }}/releases/${GITHUB_SHA}"
+            tar xzf ${{ matrix.server.path }}/artifacts/"$GITHUB_SHA".tar.gz -C "${{ matrix.server.path }}/releases/${GITHUB_SHA}"
 
             rm -rf ${{ matrix.server.path }}/releases/${GITHUB_SHA}/storage
             mkdir -p ${{ matrix.server.path }}/storage/{app,public,framework,logs}
@@ -191,5 +192,5 @@ jobs:
           port: ${{ matrix.server.port }}
           envs: RELEASES_PATH,ARTIFACTS_PATH
           script: |
-            cd $RELEASES_PATH && ls -t -1 | tail -n +3 | xargs rm -rf
-            cd $ARTIFACTS_PATH && ls -t -1 | tail -n +3 | xargs rm -rf
+            cd $RELEASES_PATH && ls -t -1 | tail -n +2 | xargs rm -rf
+            cd $ARTIFACTS_PATH && ls -t -1 | tail -n +1 | xargs rm -rf
