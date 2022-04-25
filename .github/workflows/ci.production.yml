@@ -79,7 +79,6 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ matrix.server.port }}
           envs: GITHUB_SHA
-          debug: true
           script: |
             mkdir -p "${{ matrix.server.path }}/releases/$GITHUB_SHA"
             tar -xzf ${{ matrix.server.path }}/artifacts/${GITHUB_SHA}.tar.gz -C "${{ matrix.server.path }}/releases/$GITHUB_SHA"
@@ -115,8 +114,10 @@ jobs:
           port: ${{ matrix.server.port }}
           envs: GITHUB_SHA,RELEASE_PATH,ACTIVE_RELEASE_PATH,STORAGE_PATH,BASE_PATH,LARAVEL_ENV
           script: |
-            echo $BASE_PATH
             printf "%s" "$LARAVEL_ENV" > "${BASE_PATH}/.env"
+            ln -s -f ${BASE_PATH}/.env $RELEASE_PATH
+            ln -s -f $STORAGE_PATH $RELEASE_PATH
+            ln -s -n -f $RELEASE_PATH $ACTIVE_RELEASE_PATH
 
   clean-up:
     name: "${{ matrix.server.name }}: Clean up"
@@ -139,5 +140,5 @@ jobs:
           port: ${{ matrix.server.port }}
           envs: RELEASES_PATH,ARTIFACTS_PATH
           script: |
-            cd $RELEASES_PATH && ls -t -1 | tail -n +2
-            cd $ARTIFACTS_PATH && ls -t -1 | tail -n +1
+            cd $RELEASES_PATH && ls -t -1 | tail -n +2 | xargs rm -rf
+            cd $ARTIFACTS_PATH && ls -t -1 | tail -n +2 | xargs rm -rf
