@@ -1,9 +1,9 @@
-name: Deploy Application
+name: CI Staging
 
 on:
   push:
     branches:
-      - master
+      - staging
 
 jobs:
   create-deployment-artifacts:
@@ -40,7 +40,7 @@ jobs:
       - name: Export deployment matrix
         id: export-deployment-matrix
         run: |
-          JSON="$(cat ./deployment.json)"
+          JSON="$(cat ./deployment/deployment.staging.json)"
           JSON="${JSON//'%'/'%25'}"
           JSON="${JSON//$'\n'/'%0A'}"
           JSON="${JSON//$'\r'/'%0D'}"
@@ -55,7 +55,7 @@ jobs:
         server: ${{ fromJson(needs.create-deployment-artifacts.outputs.deployment-matrix) }}
 
     steps:
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
           name: app-build
 
@@ -125,12 +125,12 @@ jobs:
       - name: Activate release
         uses: appleboy/ssh-action@master
         env:
-         GITHUB_SHA: ${{ github.sha }}
-         RELEASE_PATH: ${{ matrix.server.path }}/releases/${{ github.sha }}
-         ACTIVE_RELEASE_PATH: ${{ matrix.server.path }}/current
-         STORAGE_PATH: ${{ matrix.server.path }}/storage
-         BASE_PATH: ${{ matrix.server.path }}
-         LARAVEL_ENV: ${{ secrets.LARAVEL_ENV }}
+          GITHUB_SHA: ${{ github.sha }}
+          RELEASE_PATH: ${{ matrix.server.path }}/releases/${{ github.sha }}
+          ACTIVE_RELEASE_PATH: ${{ matrix.server.path }}/current
+          STORAGE_PATH: ${{ matrix.server.path }}/storage
+          BASE_PATH: ${{ matrix.server.path }}
+          LARAVEL_ENV: ${{ secrets.LARAVEL_ENV }}
         with:
           host: ${{ secrets.HOST }}
           username: ${{ matrix.server.username }}
@@ -138,7 +138,6 @@ jobs:
           port: ${{ matrix.server.port }}
           envs: GITHUB_SHA,RELEASE_PATH,ACTIVE_RELEASE_PATH,STORAGE_PATH,BASE_PATH,LARAVEL_ENV
           script: |
-            echo $BASE_PATH
             printf "%s" "$LARAVEL_ENV" > "${BASE_PATH}/.env"
             ln -s -f ${BASE_PATH}/.env $RELEASE_PATH
             ln -s -f $STORAGE_PATH $RELEASE_PATH
@@ -156,11 +155,11 @@ jobs:
       - name: Run after hook
         uses: appleboy/ssh-action@master
         env:
-         GITHUB_SHA: ${{ github.sha }}
-         RELEASE_PATH: ${{ matrix.server.path }}/releases/${{ github.sha }}
-         ACTIVE_RELEASE_PATH: ${{ matrix.server.path }}/current
-         STORAGE_PATH: ${{ matrix.server.path }}/storage
-         BASE_PATH: ${{ matrix.server.path }}
+          GITHUB_SHA: ${{ github.sha }}
+          RELEASE_PATH: ${{ matrix.server.path }}/releases/${{ github.sha }}
+          ACTIVE_RELEASE_PATH: ${{ matrix.server.path }}/current
+          STORAGE_PATH: ${{ matrix.server.path }}/storage
+          BASE_PATH: ${{ matrix.server.path }}
         with:
           host: ${{ secrets.HOST }}
           username: ${{ matrix.server.username }}
@@ -182,8 +181,8 @@ jobs:
       - name: Clean up
         uses: appleboy/ssh-action@master
         env:
-         RELEASES_PATH: ${{ matrix.server.path }}/releases
-         ARTIFACTS_PATH: ${{ matrix.server.path }}/artifacts
+          RELEASES_PATH: ${{ matrix.server.path }}/releases
+          ARTIFACTS_PATH: ${{ matrix.server.path }}/artifacts
         with:
           host: ${{ secrets.HOST }}
           username: ${{ matrix.server.username }}
@@ -191,4 +190,5 @@ jobs:
           port: ${{ matrix.server.port }}
           envs: RELEASES_PATH,ARTIFACTS_PATH
           script: |
-            echo Clean up disk
+            cd $RELEASES_PATH && ls -t -1 | tail -n +1 | xargs rm -rf
+            cd $ARTIFACTS_PATH && ls -t -1 | tail -n +1 | xargs rm -rf

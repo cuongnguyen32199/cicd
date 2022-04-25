@@ -1,0 +1,11 @@
+[
+  {
+    "name": "AWS | Production",
+    "username": "ubuntu",
+    "password": "",
+    "port": 22,
+    "beforeHooks": "",
+    "afterHooks": "",
+    "path": "/home/ubuntu/workspace/cicd"
+  }
+]
